@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Disinfo Tracker – Search{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="card-title mb-3">Explore a Misinformation Narrative</h2>
+        <p class="text-muted">
+          Enter a topic, claim, or keyword (e.g. "5G causes cancer", "COVID lab leak") to see
+          how often it appears in our dataset and how strongly it is associated with known false claims.
+        </p>
+
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('search') }}">
+          <div class="mb-3">
+            <label for="query" class="form-label">Topic or claim</label>
+            <input
+              type="text"
+              class="form-control"
+              id="query"
+              name="query"
+              placeholder='e.g. "vaccines cause autism"'
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Analyze</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
