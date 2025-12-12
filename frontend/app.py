@@ -3,9 +3,14 @@ from pymongo import MongoClient
 from config import MONGO_URI, DB_NAME
 
 # --- MongoDB setup ---
-client = MongoClient(MONGO_URI) if MONGO_URI else None
-db = client[DB_NAME] if client else None
-matches_col = db["narrative_matches"] if db else None
+if MONGO_URI:
+    client = MongoClient(MONGO_URI)
+    db = client[DB_NAME]
+    matches_col = db["narrative_matches"]
+else:
+    client = None
+    db = None
+    matches_col = None
 
 # --- Flask app ---
 app = Flask(__name__)
