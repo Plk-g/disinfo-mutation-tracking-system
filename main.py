@@ -3,11 +3,8 @@ import sys
 import platform
 from datetime import datetime
 
-# Setup environment variables for Spark
 os.environ['PYSPARK_PYTHON'] = sys.executable
 os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
-
-# Platform-specific Java setup
 if platform.system() == "Windows":
     import glob
     import ctypes
@@ -39,25 +36,21 @@ if platform.system() == "Windows":
             os.environ['PATH'] = hadoop_bin + ";" + os.environ['PATH']
 
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import from_json, col, udf, array
-from pyspark.sql.types import ArrayType, DoubleType
+from pyspark.sql.functions import from_json, col
 import numpy as np
 
-# Add project root to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from src.clustering.schemas import INPUT_SCHEMA
 from backend.db.queries import insert_matches, insert_mutations
 
-# Configuration
 KAFKA_BROKER = "localhost:9092"
 TOPIC = "disinformation-stream"
 
-# Global embedding model (loaded once)
 _embedding_model = None
 
 def get_embedding_model():
-    """Lazy load the embedding model"""
+    """Load Sentence-BERT model"""
     global _embedding_model
     if _embedding_model is None:
         from sentence_transformers import SentenceTransformer
@@ -67,7 +60,7 @@ def get_embedding_model():
     return _embedding_model
 
 def process_batch(batch_df, batch_id):
-    """Process a batch of Kafka messages: generate embeddings, cluster, detect mutations, write to MongoDB"""
+    """Process Kafka batch: generate embeddings and write to MongoDB"""
     records = batch_df.collect()
     if not records:
         return

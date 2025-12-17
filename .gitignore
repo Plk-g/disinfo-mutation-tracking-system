@@ -33,6 +33,10 @@ yarn-error.log*
 # =====================
 tools/kafka_*/
 *.tgz
+.spark-checkpoint/
+~/.spark-checkpoint/
+checkpoint/
+*.checkpoint
 
 # =====================
 # Data artifacts
@@ -40,4 +44,60 @@ tools/kafka_*/
 data/
 *.csv
 *.zip
+*.parquet
+*.json.gz
+
+# =====================
+# IDE / Editor
+# =====================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# =====================
+# Logs
+# =====================
+*.log
+logs/
+*.out
+
+# =====================
+# Environment / Secrets
+# =====================
+.env
+.env.local
+*.pem
+*.key
+secrets/
+
+# =====================
+# Python
+# =====================
+*.egg-info/
+dist/
+build/
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# =====================
+# Jupyter
+# =====================
+.ipynb_checkpoints/
+*.ipynb
+
+# =====================
+# Temporary files
+# =====================
+tmp/
+temp/
+*.tmp
+*.bak
+*.cache
 

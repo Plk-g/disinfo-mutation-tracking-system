@@ -1,214 +1,109 @@
-# Disinformation Mutation Tracking System
+# Disinformation Topic Mutation Tracking System
 
-This project tracks how disinformation narratives **emerge, evolve, and mutate over time** using a streaming data pipeline and an interactive backend + frontend system.
+**Course:** CSGY 6513 - Big Data  
+**Team:** Palak Gupta, Eric Zhang, Samradnyee Shinde, Shreya Srinivasan Bharadwaj, Xiangping Liu
 
-It is designed to support:
+A real-time Big Data pipeline to detect, track, and visualize the evolution ("mutation") of online disinformation narratives across large-scale text sources. The system uses streaming data processing, NLP embeddings, and clustering to identify how misinformation claims transform as they spread through communities.
 
-* narrative similarity matching
-* mutation / drift analysis
-* exploratory search and visualization for downstream analysis
+## 🎯 Project Overview
 
+This system tracks how disinformation narratives mutate over time by:
+- Processing streaming text data from multiple sources
+- Generating semantic embeddings using Sentence-BERT
+- Clustering narratives and detecting topic drift
+- Visualizing narrative evolution and mutation patterns
+- Providing real-time analysis of news authenticity
 
-## 🧠 System Overview
-
-**High-level flow:**
-
-```
-Kafka (raw posts)
-   ↓
-Spark Streaming (similarity + clustering)
-   ↓
-MongoDB (narrative_matches, mutation_events)
-   ↓
-Flask Backend + API
-   ↓
-Web UI & Visualization
-```
-
-The system is modular: each stage can be developed and tested independently.
-
-
-## 🗂️ Project Structure
+## 🏗️ System Architecture
 
 ```
-disinfo-mutation-tracking-system/
-│
-├── backend/
-│   └── db/
-│       ├── mongo_client.py      # MongoDB connection (env-based)
-│       └── queries.py           # Insert + query helpers
-│
-├── frontend/
-│   ├── app.py                   # Flask app + API routes
-│   ├── templates/
-│   │   ├── index.html
-│   │   ├── results.html
-│   │   └── mutations.html
-│   └── static/
-│
-├── docs/
-│   └── data_contract.md         # Source-of-truth schema
-│
-├── scripts/
-│   ├── create_indexes.py        # MongoDB indexes
-│   ├── smoke_test_db.py         # DB connectivity test
-│   ├── run_producer.py          # Kafka producer (sends sample narratives)
-│   ├── seed_sample_data.py      # Seed MongoDB with test data
-│   └── run_complete_pipeline.py # Pipeline coordination script
-├── src/
-│   └── clustering/
-│       ├── clusterer.py         # K-means clustering
-│       ├── drift_model.py       # Topic drift detection
-│       ├── mutation_detector.py # Mutation detection logic
-│       ├── embedding_generator.py # Sentence-BERT embeddings
-│       └── vector_utils.py       # Vector operations
-├── main.py                      # Spark streaming consumer
-│
-├── requirements.txt
-└── README.md
+Data Sources (PolitiFact, Reddit, FineWeb, GDELT, etc.)
+         ↓
+    Kafka Streaming
+         ↓
+  Spark Streaming (NLP + Clustering)
+         ↓
+    MongoDB Storage
+         ↓
+  Flask API + Web UI
+         ↓
+  Interactive Dashboard
 ```
 
-## ⚙️ Setup Instructions
+### Technology Stack
 
-### 1️⃣ Install dependencies
+- **Data Ingestion:** Apache Kafka (distributed streaming)
+- **Processing:** Apache Spark Streaming (distributed computing)
+- **Storage:** MongoDB Atlas (scalable NoSQL database)
+- **NLP:** Sentence-BERT embeddings (384 dimensions)
+- **ML:** K-means clustering, topic drift detection
+- **Interface:** Flask web application with Chart.js visualizations
 
-```bash
-pip install -r requirements.txt
-```
+## 📋 Features
 
-### 2️⃣ Set environment variables
+### Core Functionality
+- **Real-time Analysis:** Analyze news articles for authenticity (fake/real percentage)
+- **Source Citations:** View similar narratives with source attribution
+- **Mutation Tracking:** Track how disinformation narratives evolve over time
+- **Interactive Dashboard:** Visualize mutation timelines and drift patterns
+- **RESTful API:** Programmatic access to analysis results
 
-> **Important:** credentials are never hardcoded.
+### Data Sources
+- PolitiFact (fact-checked misinformation)
+- Reddit (social media posts)
+- FineWeb (large web text corpus)
+- GDELT (live news feed)
+- Laxmimerit (fake news dataset)
+- Synthetic data (for testing)
 
-```bash
-export MONGO_URI="mongodb+srv://<username>:<password>@cluster0.jwaekxl.mongodb.net/?retryWrites=true&w=majority"
-export MONGO_DB="disinfo_project"
-```
-### 3️⃣ Create MongoDB indexes (one-time)
+## 🚀 Quick Start
 
-```bash
-python3 scripts/create_indexes.py
-```
+### Prerequisites
 
-Indexes include:
+- Python 3.8+
+- Java 8, 11, or 17 (for Spark)
+- MongoDB Atlas account or local MongoDB
+- Apache Kafka (for full pipeline)
 
-* text search on `text`
-* `claim_id`
-* `cluster_id`
-* timestamps
+### Installation
 
-
-### 4️⃣ Run the application
-
-```bash
-python3 -m frontend.app
-```
-
-The app will start at:
-
-```
-http://127.0.0.1:5000
-```
-
-## 🌐 Demo Pages
-
-### 🔍 Search Interface
-
-* **URL:** `/`
-* Search narrative text and view:
-
-  * similarity statistics
-  * match rates
-  * credibility score (heuristic)
-
-### 🔄 Mutation Dashboard
-
-* **URL:** `/mutations`
-* Displays:
-
-  * top mutated narrative clusters
-  * mutation score ranking
-  * drift-over-time placeholder (API-driven)
-
-If no mutation data exists yet, the page shows a clean **empty state**.
-
-## 🔌 API Endpoints
-
-These endpoints return JSON and are intended for visualization and analysis.
-
-### Narrative search
-
-```
-GET /api/search?query=<text>&limit=20
-```
-
-### Top claims
-
-```
-GET /api/top_claims?k=10
-```
-
-### Matches for a claim
-
-```
-GET /api/claim/<claim_id>?limit=50
-```
-
-### Top mutations
-
-```
-GET /api/mutations/top?k=10
-```
-
-### Mutation timeline
-
-```
-GET /api/mutations/timeline?cluster_id=<id>
-```
-
-If no mutation data exists, **mock fallback data** is returned so demos never break.
-
-
-## 🧪 Smoke Test (Optional)
-
-To verify MongoDB connectivity:
-
-```bash
-python3 -m scripts.smoke_test_db
-```
-
-## 📄 Data Contract
-
-The authoritative schema definition lives in:
-
-```
-docs/data_contract.md
-```
-
-All upstream and downstream components are expected to conform to this contract.
-
-## 🚀 Quick Start Guide
-
-### Option 1: Test with Sample Data (No Kafka/Spark Required)
-
-1. **Seed sample data:**
+1. **Clone the repository:**
    ```bash
-   python scripts/seed_sample_data.py
+   git clone <repository-url>
+   cd disinfo-mutation-tracking-system
    ```
 
-2. **Start Flask app:**
+2. **Install dependencies:**
    ```bash
-   python -m frontend.app
+   pip install -r requirements.txt
    ```
 
-3. **Visit:** http://127.0.0.1:5000
+3. **Set environment variables:**
+   ```bash
+   export MONGO_URI="mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority"
+   export MONGO_DB="disinfo_project"
+   ```
 
-### Option 2: Full Pipeline (Kafka + Spark + MongoDB)
+4. **Create MongoDB indexes:**
+   ```bash
+   python scripts/create_indexes.py
+   ```
 
-**Prerequisites:**
-- Kafka running on `localhost:9092`
-- Java installed (for Spark)
-- MongoDB accessible (MONGO_URI set)
+### Running the System
+
+#### Option 1: Quick Demo (No Kafka Required)
+
+```bash
+# Seed sample data
+python scripts/seed_sample_data.py
+
+# Start Flask application
+python -m frontend.app
+
+# Visit http://127.0.0.1:5001
+```
+
+#### Option 2: Full Pipeline
 
 **Terminal 1 - Kafka Producer:**
 ```bash
@@ -225,19 +120,149 @@ python main.py
 python -m frontend.app
 ```
 
-## 🚧 Current Status
+## 📁 Project Structure
 
-* ✅ Backend DB layer complete
-* ✅ Flask API complete
-* ✅ Search + mutation UI ready
-* ✅ Spark streaming pipeline with embeddings
-* ✅ MongoDB integration
-* ✅ Sample data seeder
-* ✅ Cross-platform support (Windows/macOS/Linux)
+```
+disinfo-mutation-tracking-system/
+├── backend/
+│   └── db/                    # MongoDB database layer
+│       ├── mongo_client.py    # Database connection
+│       └── queries.py         # Query functions
+│
+├── frontend/
+│   ├── app.py                 # Flask application
+│   ├── templates/             # HTML templates
+│   │   ├── index.html         # Search interface
+│   │   ├── results.html       # Analysis results
+│   │   └── mutations.html     # Mutation dashboard
+│   └── static/
+│       └── styles.css         # Styling
+│
+├── src/
+│   └── clustering/            # ML and analytics
+│       ├── clusterer.py       # K-means clustering
+│       ├── drift_model.py    # Topic drift detection
+│       ├── mutation_detector.py
+│       ├── embedding_generator.py  # Sentence-BERT
+│       └── vector_utils.py    # Vector operations
+│
+├── scripts/
+│   ├── run_producer.py        # Kafka producer
+│   ├── seed_sample_data.py    # Sample data generator
+│   ├── create_indexes.py     # MongoDB indexes
+│   └── verify_system.py      # System verification
+│
+├── docs/
+│   ├── data_contract.md      # Data schema
+│   ├── storage_design.md     # Database design
+│   ├── ARCHITECTURE.md       # System architecture
+│   └── SCALABILITY.md        # Scalability strategies
+│
+├── main.py                   # Spark streaming consumer
+├── requirements.txt          # Python dependencies
+└── README.md                 # This file
+```
+
+## 🔧 Configuration
+
+### Kafka Configuration
+
+Edit `scripts/run_producer.py` to select dataset:
+```python
+SELECTED_DATASET = "FINEWEB"  # Options: SYNTHETIC, POLITIFACT, REDDIT, FINEWEB, GDELT
+TOPIC_NAME = "disinformation-stream"
+KAFKA_BROKER = "localhost:9092"
+```
+
+### MongoDB Configuration
+
+Set environment variables:
+```bash
+export MONGO_URI="your_mongodb_connection_string"
+export MONGO_DB="disinfo_project"
+```
+
+## 📊 API Endpoints
+
+### Web Interface
+- `GET /` - Search interface
+- `POST /search` - Analyze news article
+- `GET /mutations` - Mutation dashboard
+
+### REST API
+- `GET /api/search?query=<text>&limit=20` - Search narratives
+- `GET /api/top_claims?k=10` - Top claims by frequency
+- `GET /api/claim/<claim_id>?limit=50` - Matches for a claim
+- `GET /api/mutations/top?k=10` - Top mutations
+- `GET /api/mutations/timeline?cluster_id=<id>` - Mutation timeline
+
+## 🧪 Testing
+
+### System Verification
+```bash
+python scripts/verify_system.py
+```
+
+This tests:
+- MongoDB connection
+- NLP embeddings
+- Clustering functionality
+- Flask application
+- Data visualization
+
+### Quick Test
+```bash
+python scripts/quick_test.py
+```
+
+## 📈 Scalability
+
+The system is designed to handle **millions to billions of records**:
+
+- **Kafka:** Topic partitioning for parallel processing
+- **Spark:** Distributed processing across cluster nodes
+- **MongoDB:** Sharding for horizontal scaling
+- **Processing Capacity:** 10,000+ messages/second (with proper scaling)
+
+See `SCALABILITY.md` for detailed scalability strategies.
+
+## 🏛️ Architecture
+
+For detailed architecture documentation, see:
+- `ARCHITECTURE.md` - System architecture and data flow
+- `SCALABILITY.md` - Scaling strategies and performance
+- `docs/data_contract.md` - Data schema definitions
+
+## 🔒 Security
+
+- Environment variables for credentials (never hardcoded)
+- Input validation and sanitization
+- Regex injection prevention
+- Parameter validation on all API endpoints
+
+## 📝 Documentation
+
+- `LOCAL_TESTING.md` - Local testing guide
+- `SETUP.md` - Detailed setup instructions
+- `TESTING.md` - Comprehensive testing guide
+- `BUG_FIXES.md` - Bug fixes and improvements
+- `PROJECT_REQUIREMENTS_ASSESSMENT.md` - Requirements analysis
+
+## 🤝 Contributing
+
+This is a course project. For questions or issues, contact the team members.
+
+## 📄 License
+
+This project is part of CSGY 6513 - Big Data course work.
+
+## 🙏 Acknowledgments
+
+- Sentence-BERT for embeddings
+- Apache Spark and Kafka communities
+- MongoDB Atlas for database hosting
+- Bootstrap and Chart.js for UI components
 
 ---
 
-## 👩‍💻 Authors / Roles
-
-* **Backend + Storage Lead:** Palak Gupta
-* **Streaming / NLP / Visualization:** (team-specific)
+**Last Updated:** December 2024

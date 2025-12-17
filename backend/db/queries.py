@@ -30,6 +30,19 @@ def get_matches_by_keyword(query: str, limit: int = 50) -> List[Dict[str, Any]]:
     """
     Searches for matches by keyword. Uses text search if index exists, otherwise regex search.
     """
+    # Input validation
+    if not query or not isinstance(query, str):
+        return []
+    
+    # Sanitize query for regex (escape special characters)
+    import re
+    query = query.strip()
+    if not query:
+        return []
+    
+    # Clamp limit to reasonable range
+    limit = max(1, min(limit, 500))
+    
     db = get_db()
     try:
         # Try text search first (requires text index)
@@ -46,13 +59,20 @@ def get_matches_by_keyword(query: str, limit: int = 50) -> List[Dict[str, Any]]:
         # Fallback to regex search if text index doesn't exist
         pass
     
-    # Fallback: regex search on text field
-    cursor = (
-        db[MATCHES]
-        .find({"text": {"$regex": query, "$options": "i"}}, {"_id": 0})
-        .limit(limit)
-    )
-    return list(cursor)
+    # Fallback: regex search on text field (escape special regex characters)
+    try:
+        # Escape regex special characters for safety
+        escaped_query = re.escape(query)
+        cursor = (
+            db[MATCHES]
+            .find({"text": {"$regex": escaped_query, "$options": "i"}}, {"_id": 0})
+            .limit(limit)
+        )
+        return list(cursor)
+    except Exception as e:
+        # If regex search fails, return empty list
+        print(f"Warning: Search failed: {e}")
+        return []
 
 def get_top_claims(k: int = 10) -> List[Dict[str, Any]]:
     """
