@@ -1,4 +1,4 @@
-from clustering.drift_model import DriftModel
+from src.clustering.drift_model import DriftModel
 
 def test_drift_model_empty():
     dm = DriftModel()

@@ -51,7 +51,18 @@ disinfo-mutation-tracking-system/
 │
 ├── scripts/
 │   ├── create_indexes.py        # MongoDB indexes
-│   └── smoke_test_db.py         # DB connectivity test
+│   ├── smoke_test_db.py         # DB connectivity test
+│   ├── run_producer.py          # Kafka producer (sends sample narratives)
+│   ├── seed_sample_data.py      # Seed MongoDB with test data
+│   └── run_complete_pipeline.py # Pipeline coordination script
+├── src/
+│   └── clustering/
+│       ├── clusterer.py         # K-means clustering
+│       ├── drift_model.py       # Topic drift detection
+│       ├── mutation_detector.py # Mutation detection logic
+│       ├── embedding_generator.py # Sentence-BERT embeddings
+│       └── vector_utils.py       # Vector operations
+├── main.py                      # Spark streaming consumer
 │
 ├── requirements.txt
 └── README.md
@@ -176,12 +187,53 @@ docs/data_contract.md
 
 All upstream and downstream components are expected to conform to this contract.
 
+## 🚀 Quick Start Guide
+
+### Option 1: Test with Sample Data (No Kafka/Spark Required)
+
+1. **Seed sample data:**
+   ```bash
+   python scripts/seed_sample_data.py
+   ```
+
+2. **Start Flask app:**
+   ```bash
+   python -m frontend.app
+   ```
+
+3. **Visit:** http://127.0.0.1:5000
+
+### Option 2: Full Pipeline (Kafka + Spark + MongoDB)
+
+**Prerequisites:**
+- Kafka running on `localhost:9092`
+- Java installed (for Spark)
+- MongoDB accessible (MONGO_URI set)
+
+**Terminal 1 - Kafka Producer:**
+```bash
+python scripts/run_producer.py
+```
+
+**Terminal 2 - Spark Streaming:**
+```bash
+python main.py
+```
+
+**Terminal 3 - Flask Web UI:**
+```bash
+python -m frontend.app
+```
+
 ## 🚧 Current Status
 
 * ✅ Backend DB layer complete
 * ✅ Flask API complete
 * ✅ Search + mutation UI ready
-* ⏳ Waiting on Spark streaming outputs for real mutation data
+* ✅ Spark streaming pipeline with embeddings
+* ✅ MongoDB integration
+* ✅ Sample data seeder
+* ✅ Cross-platform support (Windows/macOS/Linux)
 
 ---
 

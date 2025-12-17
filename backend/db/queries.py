@@ -28,13 +28,28 @@ def get_matches_by_post_id(post_id: str, limit: int = 50) -> List[Dict[str, Any]
 
 def get_matches_by_keyword(query: str, limit: int = 50) -> List[Dict[str, Any]]:
     """
-    Uses MongoDB text search index on 'text' (idx_text_search).
+    Searches for matches by keyword. Uses text search if index exists, otherwise regex search.
     """
     db = get_db()
+    try:
+        # Try text search first (requires text index)
+        cursor = (
+            db[MATCHES]
+            .find({"$text": {"$search": query}}, {"_id": 0, "score": {"$meta": "textScore"}})
+            .sort([("score", {"$meta": "textScore"})])
+            .limit(limit)
+        )
+        results = list(cursor)
+        if results:
+            return results
+    except Exception:
+        # Fallback to regex search if text index doesn't exist
+        pass
+    
+    # Fallback: regex search on text field
     cursor = (
         db[MATCHES]
-        .find({"$text": {"$search": query}}, {"_id": 0, "score": {"$meta": "textScore"}})
-        .sort([("score", {"$meta": "textScore"})])
+        .find({"text": {"$regex": query, "$options": "i"}}, {"_id": 0})
         .limit(limit)
     )
     return list(cursor)

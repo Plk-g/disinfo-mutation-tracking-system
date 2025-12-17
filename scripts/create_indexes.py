@@ -2,7 +2,7 @@ import os
 from pymongo import MongoClient, ASCENDING, DESCENDING, TEXT
 
 MONGO_URI = os.environ.get("MONGO_URI")
-DB_NAME = os.environ.get("MONGO_DB", "disinfo_db")
+DB_NAME = os.environ.get("MONGO_DB", "disinfo_project")  # Default matches project standard
 
 if not MONGO_URI:
     raise RuntimeError("❌ MONGO_URI not set. Export it before running.")

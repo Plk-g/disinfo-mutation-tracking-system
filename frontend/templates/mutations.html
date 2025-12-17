@@ -1,58 +1,75 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Mutations</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-  <div class="container">
+{% extends "base.html" %}
+{% block title %}Mutations – Disinfo Tracker{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12 mb-3">
     <h1>Mutation Dashboard</h1>
-    <p class="subtitle">Track how narratives evolve over time.</p>
+    <p class="text-muted">Track how narratives evolve over time.</p>
+  </div>
+</div>
 
-    {% if empty %}
-      <div class="card">
-        <h2>No mutation data yet</h2>
-        <p>This view will populate once the streaming pipeline writes to <code>mutation_events</code>.</p>
-      </div>
-    {% endif %}
+{% if empty %}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="alert alert-info">
+      <h4>No mutation data yet</h4>
+      <p>This view will populate once the streaming pipeline writes to <code>mutation_events</code>.</p>
+      <p class="mb-0"><small>Run the Spark streaming pipeline to start detecting mutations.</small></p>
+    </div>
+  </div>
+</div>
+{% endif %}
 
-    <div class="grid">
-      <div class="card">
-        <h2>Top mutated narratives</h2>
+<div class="row">
+  <div class="col-md-6 mb-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h3 class="card-title">Top Mutated Narratives</h3>
         {% if top_mutations and top_mutations|length > 0 %}
-          <table>
-            <thead>
-              <tr>
-                <th>Cluster</th>
-                <th>Type</th>
-                <th>Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for m in top_mutations %}
+          <div class="table-responsive">
+            <table class="table table-striped table-sm">
+              <thead>
                 <tr>
-                  <td>{{ m.get('cluster_id', '-') }}</td>
-                  <td>{{ m.get('mutation_type', '-') }}</td>
-                  <td>{{ m.get('mutation_score', '-') }}</td>
+                  <th>Cluster ID</th>
+                  <th>Type</th>
+                  <th>Score</th>
                 </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {% for m in top_mutations %}
+                  <tr>
+                    <td><code>{{ m.get('cluster_id', '-') }}</code></td>
+                    <td>{{ m.get('mutation_type', '-') }}</td>
+                    <td><strong>{{ "%.3f"|format(m.get('mutation_score', 0)) }}</strong></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         {% else %}
-          <p class="muted">No results yet.</p>
+          <p class="text-muted">No results yet.</p>
         {% endif %}
       </div>
+    </div>
+  </div>
 
-      <div class="card">
-        <h2>Drift over time</h2>
-        <p class="muted">Placeholder: chart will render from <code>/api/mutations/timeline</code>.</p>
-        <div style="height: 220px; border: 1px dashed #bbb; border-radius: 10px; display:flex; align-items:center; justify-content:center;">
-          <span class="muted">Timeline chart goes here</span>
+  <div class="col-md-6 mb-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h3 class="card-title">Drift Over Time</h3>
+        <p class="text-muted">Timeline visualization (placeholder)</p>
+        <div style="height: 300px; border: 2px dashed #dee2e6; border-radius: 8px; display:flex; align-items:center; justify-content:center; background-color: #f8f9fa;">
+          <span class="text-muted">Timeline chart will render from <code>/api/mutations/timeline</code></span>
         </div>
       </div>
     </div>
-
-    <p><a href="/">← Back to search</a></p>
   </div>
-</body>
-</html>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">← Back to search</a>
+  </div>
+</div>
+{% endblock %}
