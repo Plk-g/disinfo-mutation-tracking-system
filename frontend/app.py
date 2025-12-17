@@ -1,16 +1,13 @@
-from flask import Flask, render_template, request
-from pymongo import MongoClient
-from config import MONGO_URI, DB_NAME
+import time
+from flask import Flask, render_template, request, jsonify
 
-# --- MongoDB setup ---
-if MONGO_URI:
-    client = MongoClient(MONGO_URI)
-    db = client[DB_NAME]
-    matches_col = db["narrative_matches"]
-else:
-    client = None
-    db = None
-    matches_col = None
+from backend.db.queries import (
+    get_matches_by_keyword,
+    get_matches_by_claim_id,
+    get_top_claims,
+    get_top_mutations,
+    get_mutation_timeline,
+)
 
 # --- Flask app ---
 app = Flask(__name__)
@@ -23,17 +20,16 @@ def index():
 
 @app.route("/search", methods=["POST"])
 def search():
-    if matches_col is None:
-        return "MongoDB is not configured. Please set MONGO_URI environment variable.", 500
-
     query = request.form.get("query", "").strip()
     if not query:
         return render_template("index.html", error="Please enter a topic or keyword.")
 
-    # Simple case-insensitive text search in the 'text' field
-    mongo_query = {"text": {"$regex": query, "$options": "i"}}
+    try:
+        # Uses MongoDB text index (recommended) via helper layer
+        docs = get_matches_by_keyword(query, limit=200)
+    except Exception as e:
+        return f"MongoDB error: {str(e)}", 500
 
-    docs = list(matches_col.find(mongo_query).limit(200))  # limit for sanity
     total = len(docs)
 
     if total == 0:
@@ -52,7 +48,6 @@ def search():
     matched_flags = []
 
     for doc in docs:
-        # similarity_score might be missing or not a float
         try:
             similarities.append(float(doc.get("similarity_score", 0.0)))
         except (TypeError, ValueError):
@@ -67,9 +62,6 @@ def search():
         else 0.0
     )
 
-    # Very simple “credibility” heuristic:
-    # higher similarity + higher match_rate → more aligned with known misinformation
-    # Convert that into a 0–100 score where higher = more credible
     credibility_score = int(
         max(0, min(100, (1 - avg_sim) * 60 + (1 - match_rate) * 40))
     )
@@ -87,6 +79,117 @@ def search():
     )
 
 
+# ----------------------------
+# Mutations page (HTML)
+# ----------------------------
+
+@app.get("/mutations")
+def mutations_page():
+    """
+    Demo-friendly page. Shows real data if mutation_events exists,
+    otherwise shows a clean empty state with placeholders.
+    """
+    try:
+        top = get_top_mutations(k=10)
+        empty = (len(top) == 0)
+    except Exception:
+        top = []
+        empty = True
+
+    return render_template("mutations.html", top_mutations=top, empty=empty)
+
+
+# ----------------------------
+# API routes (JSON for viz/demo)
+# ----------------------------
+
+@app.get("/api/search")
+def api_search():
+    query = (request.args.get("query") or "").strip()
+    limit = int(request.args.get("limit", 20))
+
+    if not query:
+        return jsonify({"query": query, "count": 0, "items": []})
+
+    try:
+        items = get_matches_by_keyword(query, limit=limit)
+        return jsonify({"query": query, "count": len(items), "items": items})
+    except Exception as e:
+        return jsonify({"error": str(e), "query": query}), 500
+
+
+@app.get("/api/top_claims")
+def api_top_claims():
+    k = int(request.args.get("k", 10))
+
+    try:
+        items = get_top_claims(k=k)
+        return jsonify({"k": k, "items": items})
+    except Exception as e:
+        return jsonify({"error": str(e), "k": k}), 500
+
+
+@app.get("/api/claim/<claim_id>")
+def api_claim(claim_id):
+    limit = int(request.args.get("limit", 50))
+
+    try:
+        items = get_matches_by_claim_id(claim_id, limit=limit)
+        return jsonify({"claim_id": claim_id, "count": len(items), "items": items})
+    except Exception as e:
+        return jsonify({"error": str(e), "claim_id": claim_id}), 500
+
+
+@app.get("/api/mutations/top")
+def api_mutations_top():
+    k = int(request.args.get("k", 10))
+
+    try:
+        items = get_top_mutations(k=k)
+        if not items:
+            items = _mock_top_mutations(k)
+        return jsonify({"k": k, "items": items})
+    except Exception as e:
+        return jsonify({"error": str(e), "k": k}), 500
+
+
+@app.get("/api/mutations/timeline")
+def api_mutations_timeline():
+    cluster_id = (request.args.get("cluster_id") or "").strip()
+
+    try:
+        points = get_mutation_timeline(cluster_id, limit=200) if cluster_id else []
+        if not points:
+            points = _mock_timeline()
+        return jsonify({"cluster_id": cluster_id, "points": points})
+    except Exception as e:
+        return jsonify({"error": str(e), "cluster_id": cluster_id}), 500
+
+
+# ----------------------------
+# Mock fallback helpers (demo never breaks)
+# ----------------------------
+
+def _mock_top_mutations(k: int):
+    return [
+        {
+            "cluster_id": f"cluster_{i+1}",
+            "mutation_type": "lexical_shift",
+            "mutation_score": round(0.9 - i * 0.06, 2),
+        }
+        for i in range(min(k, 10))
+    ]
+
+
+def _mock_timeline():
+    now = int(time.time())
+    return [
+        {"window_start": now - 3600 * 6, "window_end": now - 3600 * 5, "mutation_score": 0.20},
+        {"window_start": now - 3600 * 5, "window_end": now - 3600 * 4, "mutation_score": 0.35},
+        {"window_start": now - 3600 * 4, "window_end": now - 3600 * 3, "mutation_score": 0.50},
+        {"window_start": now - 3600 * 3, "window_end": now - 3600 * 2, "mutation_score": 0.65},
+    ]
+
+
 if __name__ == "__main__":
-    # For local testing
     app.run(debug=True)
