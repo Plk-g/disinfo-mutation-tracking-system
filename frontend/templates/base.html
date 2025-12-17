@@ -1,29 +1,34 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>{% block title %}Disinfo Tracker{% endblock %}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Bootstrap for quick styling -->
+  <meta charset="utf-8">
+  <title>Disinformation Mutation Tracker</title>
+
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
     rel="stylesheet"
-  />
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  >
+
+ 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
+
 <body class="bg-light">
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+
+  <nav class="navbar navbar-dark bg-dark mb-4">
     <div class="container">
-      <a class="navbar-brand" href="/">Disinformation Mutation Tracker</a>
+      <span class="navbar-brand mb-0 h1">
+        Disinformation Mutation Tracker
+      </span>
     </div>
   </nav>
 
-  <main class="container mb-5">
-    {% block content %}{% endblock %}
-  </main>
+  {% block content %}{% endblock %}
 
-  <footer class="text-center text-muted mb-3">
-    <small>CSGY 6513 · Big Data Project</small>
-  </footer>
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
+  </script>
+
 </body>
 </html>
+

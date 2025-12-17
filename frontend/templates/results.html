@@ -1,88 +1,195 @@
 {% extends "base.html" %}
-{% block title %}Results – {{ query }}{% endblock %}
 
 {% block content %}
-<div class="row">
-  <div class="col-12 mb-3">
-    <h2>Results for: <span class="text-primary">{{ query }}</span></h2>
-  </div>
-</div>
+<div class="container mt-4">
 
-{% if total == 0 %}
-<div class="alert alert-warning">
-  No matching posts found for this topic in the current dataset.
-</div>
-<a href="{{ url_for('index') }}" class="btn btn-secondary">Back to search</a>
-{% else %}
-<div class="row mb-4">
-  <div class="col-md-4">
-    <div class="card shadow-sm mb-3">
-      <div class="card-body">
-        <h5 class="card-title">Total Related Posts</h5>
-        <p class="display-6">{{ total }}</p>
+  <h2 class="mb-3">Results for: <span class="text-primary">{{ query }}</span></h2>
+
+  {% if backend_ok %}
+    <div class="alert alert-success py-2">Backend status: connected</div>
+  {% else %}
+    <div class="alert alert-warning py-2">Backend status: using mock fallback</div>
+  {% endif %}
+
+  <ul class="nav nav-tabs" id="resultsTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview"
+              type="button" role="tab">Overview</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="mutation-tab" data-bs-toggle="tab" data-bs-target="#mutation"
+              type="button" role="tab">Mutation</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="evidence-tab" data-bs-toggle="tab" data-bs-target="#evidence"
+              type="button" role="tab">Evidence</button>
+    </li>
+  </ul>
+
+  <div class="tab-content pt-3">
+
+    <!-- OVERVIEW TAB -->
+    <div class="tab-pane fade show active" id="overview" role="tabpanel">
+      <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          <div class="card p-3">
+            <div class="text-muted">Total Related Posts</div>
+            <div class="fs-3 fw-bold">{{ total }}</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card p-3">
+            <div class="text-muted">Avg Similarity</div>
+            <div class="fs-3 fw-bold">{{ avg_similarity }}</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card p-3">
+            <div class="text-muted">Credibility Score</div>
+            <div class="fs-3 fw-bold">{{ credibility_score }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-lg-6">
+          <div class="card p-3">
+            <h5>Posts over time</h5>
+            <canvas id="postsOverTime"></canvas>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="card p-3">
+            <h5>Posts by source</h5>
+            <canvas id="postsBySource"></canvas>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="card p-3">
+            <h5>Similarity distribution</h5>
+            <canvas id="similarityHist"></canvas>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="card p-3">
+            <h5>Variants distribution</h5>
+            <canvas id="variantsBar"></canvas>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="col-md-4">
-    <div class="card shadow-sm mb-3">
-      <div class="card-body">
-        <h5 class="card-title">Avg. Similarity</h5>
-        <p class="display-6">
-          {{ avg_similarity }}
-        </p>
-        <small class="text-muted">0 = unrelated, 1 = highly aligned with known misinformation.</small>
+    <!-- MUTATION TAB -->
+    <div class="tab-pane fade" id="mutation" role="tabpanel">
+      <div class="row g-4">
+        <div class="col-12">
+          <div class="card p-3">
+            <h5>Variants over time</h5>
+            <p class="text-muted mb-2">Shows how different narrative variants emerge and grow across time windows.</p>
+            <canvas id="variantsOverTime"></canvas>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="col-md-4">
-    <div class="card shadow-sm mb-3">
-      <div class="card-body">
-        <h5 class="card-title">Credibility Score</h5>
-        {% if credibility_score is not none %}
-        <p class="display-6">{{ credibility_score }} / 100</p>
-        <small class="text-muted">
-          Higher score = appears more credible (less similar to known false claims).
-        </small>
-        {% else %}
-        <p class="text-muted">N/A</p>
-        {% endif %}
+    <!-- EVIDENCE TAB -->
+    <div class="tab-pane fade" id="evidence" role="tabpanel">
+      <div class="card p-3">
+        <h5>Sample posts</h5>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Source</th>
+                <th>Variant</th>
+                <th>Similarity</th>
+                <th>Matched</th>
+                <th>Text</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in posts %}
+              <tr>
+                <td>{{ p.timestamp }}</td>
+                <td>{{ p.source }}</td>
+                <td>{{ p.variant }}</td>
+                <td>{{ "%.3f"|format(p.similarity) }}</td>
+                <td>{{ "Yes" if p.matched else "No" }}</td>
+                <td>{{ p.text }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
+
   </div>
 </div>
 
-<div class="row">
-  <div class="col-12">
-    <h4>Sample Posts</h4>
-    <table class="table table-striped table-sm">
-      <thead>
-        <tr>
-          <th>Text</th>
-          <th>Similarity</th>
-          <th>Matched?</th>
-          <th>Source</th>
-          <th>Timestamp</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for p in posts %}
-        <tr>
-          <td style="max-width: 420px;">
-            {{ p.text if p.text is defined else p.get("text", "") }}
-          </td>
-          <td>{{ "%.3f"|format(p.get("similarity_score", 0) or 0) }}</td>
-          <td>{% if p.get("matched") %}Yes{% else %}No{% endif %}</td>
-          <td>{{ p.get("source", "") }}</td>
-          <td>{{ p.get("timestamp", "") }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
+<script>
+  const timeLabels = {{ time_labels|tojson }};
+  const timeCounts = {{ time_counts|tojson }};
+  const sourceLabels = {{ source_labels|tojson }};
+  const sourceCounts = {{ source_counts|tojson }};
+  const histLabels = {{ hist_labels|tojson }};
+  const histCounts = {{ hist_counts|tojson }};
 
-<a href="{{ url_for('index') }}" class="btn btn-secondary mt-3">Back to search</a>
-{% endif %}
+  const variantLabels = {{ variant_labels|tojson }};
+  const variantCounts = {{ variant_counts|tojson }};
+  const variantTimeLabels = {{ variant_time_labels|tojson }};
+  const variantTimeSeries = {{ variant_time_series|tojson }};
+
+  const ctx1 = document.getElementById("postsOverTime");
+  if (ctx1) new Chart(ctx1, {
+    type: "line",
+    data: { labels: timeLabels, datasets: [{ label: "Posts", data: timeCounts, tension: 0.3 }] },
+    options: { responsive: true, plugins: { legend: { display: false } } }
+  });
+
+  const ctx2 = document.getElementById("postsBySource");
+  if (ctx2) new Chart(ctx2, {
+    type: "bar",
+    data: { labels: sourceLabels, datasets: [{ label: "Posts", data: sourceCounts }] },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+  });
+
+  const ctx3 = document.getElementById("similarityHist");
+  if (ctx3) new Chart(ctx3, {
+    type: "bar",
+    data: { labels: histLabels, datasets: [{ label: "Count", data: histCounts }] },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+  });
+
+  const ctx4 = document.getElementById("variantsBar");
+  if (ctx4) new Chart(ctx4, {
+    type: "bar",
+    data: { labels: variantLabels, datasets: [{ label: "Posts", data: variantCounts }] },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+  });
+
+  const ctx5 = document.getElementById("variantsOverTime");
+  if (ctx5) {
+    const datasets = variantTimeSeries.map(s => ({
+      label: s.variant,
+      data: s.counts,
+      tension: 0.3
+    }));
+
+    new Chart(ctx5, {
+      type: "line",
+      data: { labels: variantTimeLabels, datasets },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: "top" } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  }
+</script>
 {% endblock %}
+

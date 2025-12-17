@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Disinformation Mutation Tracker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+<div class="container">
+
+  <h1>Disinformation Mutation Tracker</h1>
+
+  <h2>Results for: <span style="color:#2563eb">{{ query }}</span></h2>
+
+  {% if not backend_ok %}
+    <div class="alert">
+      Backend status: using mock fallback
+    </div>
+  {% endif %}
+
+  <div class="stats">
+    <div class="card">
+      <h3>Total Related Posts</h3>
+      <p>{{ total }}</p>
+    </div>
+    <div class="card">
+      <h3>Avg Similarity</h3>
+      <p>{{ avg_similarity }}</p>
+    </div>
+    <div class="card">
+      <h3>Credibility Score</h3>
+      <p>{{ credibility_score }}</p>
+    </div>
+  </div>
+
+  <h3>Posts over time</h3>
+  <canvas id="timeChart"></canvas>
+
+  <h3>Posts by source</h3>
+  <canvas id="sourceChart"></canvas>
+
+  <h3>Similarity distribution</h3>
+  <canvas id="similarityChart"></canvas>
+
+  <h3>Variants distribution</h3>
+  <ul>
+    {% for p in posts %}
+      <li>
+        <strong>{{ p.get("variant", "Unknown") }}</strong>
+        — {{ p.get("source", "unknown") }}
+        ({{ p.get("similarity", p.get("similarity_score", 0)) }})
+      </li>
+    {% endfor %}
+  </ul>
+
+</div>
+
+<script>
+const timeLabels = {{ time_labels | tojson | safe }};
+const timeCounts = {{ time_counts | tojson | safe }};
+const sourceLabels = {{ source_labels | tojson | safe }};
+const sourceCounts = {{ source_counts | tojson | safe }};
+const histLabels = {{ hist_labels | tojson | safe }};
+const histCounts = {{ hist_counts | tojson | safe }};
+
+new Chart(document.getElementById("timeChart"), {
+  type: "line",
+  data: {
+    labels: timeLabels,
+    datasets: [{
+      label: "Posts",
+      data: timeCounts,
+      borderColor: "#2563eb",
+      fill: false
+    }]
+  }
+});
+
+new Chart(document.getElementById("sourceChart"), {
+  type: "bar",
+  data: {
+    labels: sourceLabels,
+    datasets: [{
+      label: "Posts",
+      data: sourceCounts,
+      backgroundColor: "#16a34a"
+    }]
+  }
+});
+
+new Chart(document.getElementById("similarityChart"), {
+  type: "bar",
+  data: {
+    labels: histLabels,
+    datasets: [{
+      label: "Count",
+      data: histCounts,
+      backgroundColor: "#f59e0b"
+    }]
+  }
+});
+</script>
+
+</body>
+</html>
+

@@ -16,14 +16,15 @@
         <div class="alert alert-danger">{{ error }}</div>
         {% endif %}
 
-        <form method="POST" action="{{ url_for('search') }}">
+        <form method="GET" action="{{ url_for('search_get') }}">
+
           <div class="mb-3">
             <label for="query" class="form-label">Topic or claim</label>
             <input
               type="text"
               class="form-control"
               id="query"
-              name="query"
+              name="q"
               placeholder='e.g. "vaccines cause autism"'
               required
             />
