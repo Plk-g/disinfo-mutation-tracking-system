@@ -80,8 +80,14 @@ Data Sources (PolitiFact, Reddit, FineWeb, GDELT, etc.)
 
 3. **Set environment variables:**
    ```bash
-   export MONGO_URI="mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority"
+   export MONGO_URI="mongodb+srv://<username>:<password>@cluster.mongodb.net/?retryWrites=true&w=majority"
    export MONGO_DB="disinfo_project"
+   ```
+   
+   **Or use .env file:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your credentials
    ```
 
 4. **Create MongoDB indexes:**

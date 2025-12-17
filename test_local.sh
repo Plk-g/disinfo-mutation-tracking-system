@@ -13,8 +13,14 @@ if [ ! -f "scripts/run_producer.py" ]; then
 fi
 
 # Set environment variables
-export MONGO_URI="mongodb+srv://pg2820_db_user:BigDataGroup123@cluster0.jwaekxl.mongodb.net/?appName=Cluster0"
-export MONGO_DB="disinfo_project"
+# IMPORTANT: Replace <username> and <password> with your MongoDB Atlas credentials
+if [ -z "$MONGO_URI" ]; then
+    echo "ERROR: MONGO_URI not set. Please set it before running:"
+    echo "  export MONGO_URI='mongodb+srv://<username>:<password>@cluster0.jwaekxl.mongodb.net/?appName=Cluster0'"
+    exit 1
+fi
+
+export MONGO_DB="${MONGO_DB:-disinfo_project}"
 
 echo "1. Running quick test..."
 python scripts/quick_test.py

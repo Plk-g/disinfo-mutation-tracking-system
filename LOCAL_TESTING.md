@@ -27,15 +27,17 @@ This will check:
 ### Step 1: Set Environment Variables
 
 ```bash
-export MONGO_URI="mongodb+srv://pg2820_db_user:BigDataGroup123@cluster0.jwaekxl.mongodb.net/?appName=Cluster0"
+export MONGO_URI="mongodb+srv://<username>:<password>@cluster0.jwaekxl.mongodb.net/?appName=Cluster0"
 export MONGO_DB="disinfo_project"
 ```
 
 **Windows (PowerShell):**
 ```powershell
-$env:MONGO_URI="mongodb+srv://pg2820_db_user:BigDataGroup123@cluster0.jwaekxl.mongodb.net/?appName=Cluster0"
+$env:MONGO_URI="mongodb+srv://<username>:<password>@cluster0.jwaekxl.mongodb.net/?appName=Cluster0"
 $env:MONGO_DB="disinfo_project"
 ```
+
+**Note:** Replace `<username>` and `<password>` with your MongoDB Atlas credentials.
 
 ### Step 2: Create MongoDB Indexes
 
@@ -118,7 +120,7 @@ You should see:
 ### Step 1: Set Environment Variables
 
 ```bash
-export MONGO_URI="mongodb+srv://pg2820_db_user:BigDataGroup123@cluster0.jwaekxl.mongodb.net/?appName=Cluster0"
+export MONGO_URI="mongodb+srv://<username>:<password>@cluster0.jwaekxl.mongodb.net/?appName=Cluster0"
 export MONGO_DB="disinfo_project"
 ```
 
@@ -133,7 +135,7 @@ python scripts/create_indexes.py
 **Terminal 1 - Kafka Producer:**
 ```bash
 cd /Users/palakgupta/Desktop/disinfo-mutation-tracking-system/disinfo-mutation-tracking-system
-export MONGO_URI="mongodb+srv://pg2820_db_user:BigDataGroup123@cluster0.jwaekxl.mongodb.net/?appName=Cluster0"
+export MONGO_URI="mongodb+srv://<username>:<password>@cluster0.jwaekxl.mongodb.net/?appName=Cluster0"
 export MONGO_DB="disinfo_project"
 
 # For synthetic data (always works):
@@ -158,7 +160,7 @@ Streaming from SYNTHETIC dataset...
 **Terminal 2 - Spark Streaming Consumer:**
 ```bash
 cd /Users/palakgupta/Desktop/disinfo-mutation-tracking-system/disinfo-mutation-tracking-system
-export MONGO_URI="mongodb+srv://pg2820_db_user:BigDataGroup123@cluster0.jwaekxl.mongodb.net/?appName=Cluster0"
+export MONGO_URI="mongodb+srv://<username>:<password>@cluster0.jwaekxl.mongodb.net/?appName=Cluster0"
 export MONGO_DB="disinfo_project"
 
 python main.py
@@ -183,7 +185,7 @@ Inserted 5 records into MongoDB
 **Terminal 3 - Flask Web Application:**
 ```bash
 cd /Users/palakgupta/Desktop/disinfo-mutation-tracking-system/disinfo-mutation-tracking-system
-export MONGO_URI="mongodb+srv://pg2820_db_user:BigDataGroup123@cluster0.jwaekxl.mongodb.net/?appName=Cluster0"
+export MONGO_URI="mongodb+srv://<username>:<password>@cluster0.jwaekxl.mongodb.net/?appName=Cluster0"
 export MONGO_DB="disinfo_project"
 
 python -m frontend.app
@@ -204,7 +206,7 @@ python -m frontend.app
 
 ```bash
 cd /Users/palakgupta/Desktop/disinfo-mutation-tracking-system/disinfo-mutation-tracking-system
-export MONGO_URI="mongodb+srv://pg2820_db_user:BigDataGroup123@cluster0.jwaekxl.mongodb.net/?appName=Cluster0"
+export MONGO_URI="mongodb+srv://<username>:<password>@cluster0.jwaekxl.mongodb.net/?appName=Cluster0"
 export MONGO_DB="disinfo_project"
 
 python scripts/verify_system.py

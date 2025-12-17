@@ -11,7 +11,7 @@ cd /Users/palakgupta/Desktop/disinfo-mutation-tracking-system/disinfo-mutation-t
 ## Step 2: Set environment variables
 
 ```bash
-export MONGO_URI="mongodb+srv://pg2820_db_user:BigDataGroup123@cluster0.jwaekxl.mongodb.net/?appName=Cluster0"
+export MONGO_URI="mongodb+srv://<username>:<password>@cluster0.jwaekxl.mongodb.net/?appName=Cluster0"
 export MONGO_DB="disinfo_project"
 ```
 
