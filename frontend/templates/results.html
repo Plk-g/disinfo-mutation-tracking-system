@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Results – {{ query }}{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12 mb-3">
+    <h2>Results for: <span class="text-primary">{{ query }}</span></h2>
+  </div>
+</div>
+
+{% if total == 0 %}
+<div class="alert alert-warning">
+  No matching posts found for this topic in the current dataset.
+</div>
+<a href="{{ url_for('index') }}" class="btn btn-secondary">Back to search</a>
+{% else %}
+<div class="row mb-4">
+  <div class="col-md-4">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Total Related Posts</h5>
+        <p class="display-6">{{ total }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Avg. Similarity</h5>
+        <p class="display-6">
+          {{ avg_similarity }}
+        </p>
+        <small class="text-muted">0 = unrelated, 1 = highly aligned with known misinformation.</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Credibility Score</h5>
+        {% if credibility_score is not none %}
+        <p class="display-6">{{ credibility_score }} / 100</p>
+        <small class="text-muted">
+          Higher score = appears more credible (less similar to known false claims).
+        </small>
+        {% else %}
+        <p class="text-muted">N/A</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <h4>Sample Posts</h4>
+    <table class="table table-striped table-sm">
+      <thead>
+        <tr>
+          <th>Text</th>
+          <th>Similarity</th>
+          <th>Matched?</th>
+          <th>Source</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in posts %}
+        <tr>
+          <td style="max-width: 420px;">
+            {{ p.text if p.text is defined else p.get("text", "") }}
+          </td>
+          <td>{{ "%.3f"|format(p.get("similarity_score", 0) or 0) }}</td>
+          <td>{% if p.get("matched") %}Yes{% else %}No{% endif %}</td>
+          <td>{{ p.get("source", "") }}</td>
+          <td>{{ p.get("timestamp", "") }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<a href="{{ url_for('index') }}" class="btn btn-secondary mt-3">Back to search</a>
+{% endif %}
+{% endblock %}
