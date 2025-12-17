@@ -1,0 +1,17 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Kafka / Spark
+tools/kafka_*/
+*.tgz
+
+# Data
+data/
+*.csv
+*.zip
+
+# OS
+.DS_Store
+Thumbs.db
