@@ -28,3 +28,11 @@ DRIFT_EVENT_SCHEMA = StructType([
     StructField("drift_score", DoubleType(), False),
     StructField("event_type", StringType(), False),
 ])
+
+# Raw JSON coming from Kafka
+INPUT_SCHEMA = StructType([
+    StructField("post_id", StringType()),
+    StructField("text", StringType()),
+    StructField("source", StringType()),
+    StructField("timestamp", StringType())
+])
