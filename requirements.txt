@@ -20,3 +20,9 @@ matplotlib
 # Networking / utilities
 dnspython
 
+# Data
+scipy
+spark-nlp
+requests
+beautifulsoup4
+datasets
