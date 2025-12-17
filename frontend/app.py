@@ -25,7 +25,6 @@ def index():
 def analyze_text(text):
     """Analyze text and determine fake/real percentage with citations"""
     if not text or not isinstance(text, str) or not text.strip():
-    if not text or not isinstance(text, str) or not text.strip():
         return {
             "no_results": True,
             "fake_percentage": None,
