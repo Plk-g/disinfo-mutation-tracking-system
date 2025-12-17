@@ -8,7 +8,6 @@ It is designed to support:
 * mutation / drift analysis
 * exploratory search and visualization for downstream analysis
 
----
 
 ## 🧠 System Overview
 
@@ -28,7 +27,6 @@ Web UI & Visualization
 
 The system is modular: each stage can be developed and tested independently.
 
----
 
 ## 🗂️ Project Structure
 
@@ -59,8 +57,6 @@ disinfo-mutation-tracking-system/
 └── README.md
 ```
 
----
-
 ## ⚙️ Setup Instructions
 
 ### 1️⃣ Install dependencies
@@ -68,8 +64,6 @@ disinfo-mutation-tracking-system/
 ```bash
 pip install -r requirements.txt
 ```
-
----
 
 ### 2️⃣ Set environment variables
 
@@ -79,9 +73,6 @@ pip install -r requirements.txt
 export MONGO_URI="mongodb+srv://<username>:<password>@cluster0.jwaekxl.mongodb.net/?retryWrites=true&w=majority"
 export MONGO_DB="disinfo_project"
 ```
-
----
-
 ### 3️⃣ Create MongoDB indexes (one-time)
 
 ```bash
@@ -95,7 +86,6 @@ Indexes include:
 * `cluster_id`
 * timestamps
 
----
 
 ### 4️⃣ Run the application
 
@@ -109,8 +99,6 @@ The app will start at:
 http://127.0.0.1:5000
 ```
 
----
-
 ## 🌐 Demo Pages
 
 ### 🔍 Search Interface
@@ -122,8 +110,6 @@ http://127.0.0.1:5000
   * match rates
   * credibility score (heuristic)
 
----
-
 ### 🔄 Mutation Dashboard
 
 * **URL:** `/mutations`
@@ -134,8 +120,6 @@ http://127.0.0.1:5000
   * drift-over-time placeholder (API-driven)
 
 If no mutation data exists yet, the page shows a clean **empty state**.
-
----
 
 ## 🔌 API Endpoints
 
@@ -173,7 +157,6 @@ GET /api/mutations/timeline?cluster_id=<id>
 
 If no mutation data exists, **mock fallback data** is returned so demos never break.
 
----
 
 ## 🧪 Smoke Test (Optional)
 
@@ -182,8 +165,6 @@ To verify MongoDB connectivity:
 ```bash
 python3 -m scripts.smoke_test_db
 ```
-
----
 
 ## 📄 Data Contract
 
@@ -194,8 +175,6 @@ docs/data_contract.md
 ```
 
 All upstream and downstream components are expected to conform to this contract.
-
----
 
 ## 🚧 Current Status
 
