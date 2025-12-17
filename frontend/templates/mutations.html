@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mutations</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Mutation Dashboard</h1>
+    <p class="subtitle">Track how narratives evolve over time.</p>
+
+    {% if empty %}
+      <div class="card">
+        <h2>No mutation data yet</h2>
+        <p>This view will populate once the streaming pipeline writes to <code>mutation_events</code>.</p>
+      </div>
+    {% endif %}
+
+    <div class="grid">
+      <div class="card">
+        <h2>Top mutated narratives</h2>
+        {% if top_mutations and top_mutations|length > 0 %}
+          <table>
+            <thead>
+              <tr>
+                <th>Cluster</th>
+                <th>Type</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for m in top_mutations %}
+                <tr>
+                  <td>{{ m.get('cluster_id', '-') }}</td>
+                  <td>{{ m.get('mutation_type', '-') }}</td>
+                  <td>{{ m.get('mutation_score', '-') }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p class="muted">No results yet.</p>
+        {% endif %}
+      </div>
+
+      <div class="card">
+        <h2>Drift over time</h2>
+        <p class="muted">Placeholder: chart will render from <code>/api/mutations/timeline</code>.</p>
+        <div style="height: 220px; border: 1px dashed #bbb; border-radius: 10px; display:flex; align-items:center; justify-content:center;">
+          <span class="muted">Timeline chart goes here</span>
+        </div>
+      </div>
+    </div>
+
+    <p><a href="/">← Back to search</a></p>
+  </div>
+</body>
+</html>

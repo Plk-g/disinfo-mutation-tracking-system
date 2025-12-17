@@ -1,2 +1,191 @@
-# disinfo-mutation-tracking-system
-NYU CSGY 6513 Big Data Engineering Final Project – Real-Time Disinformation Topic Mutation Tracking System
+# Disinformation Mutation Tracking System
+
+This project tracks how disinformation narratives **emerge, evolve, and mutate over time** using a streaming data pipeline and an interactive backend + frontend system.
+
+It is designed to support:
+
+* narrative similarity matching
+* mutation / drift analysis
+* exploratory search and visualization for downstream analysis
+
+
+## 🧠 System Overview
+
+**High-level flow:**
+
+```
+Kafka (raw posts)
+   ↓
+Spark Streaming (similarity + clustering)
+   ↓
+MongoDB (narrative_matches, mutation_events)
+   ↓
+Flask Backend + API
+   ↓
+Web UI & Visualization
+```
+
+The system is modular: each stage can be developed and tested independently.
+
+
+## 🗂️ Project Structure
+
+```
+disinfo-mutation-tracking-system/
+│
+├── backend/
+│   └── db/
+│       ├── mongo_client.py      # MongoDB connection (env-based)
+│       └── queries.py           # Insert + query helpers
+│
+├── frontend/
+│   ├── app.py                   # Flask app + API routes
+│   ├── templates/
+│   │   ├── index.html
+│   │   ├── results.html
+│   │   └── mutations.html
+│   └── static/
+│
+├── docs/
+│   └── data_contract.md         # Source-of-truth schema
+│
+├── scripts/
+│   ├── create_indexes.py        # MongoDB indexes
+│   └── smoke_test_db.py         # DB connectivity test
+│
+├── requirements.txt
+└── README.md
+```
+
+## ⚙️ Setup Instructions
+
+### 1️⃣ Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 2️⃣ Set environment variables
+
+> **Important:** credentials are never hardcoded.
+
+```bash
+export MONGO_URI="mongodb+srv://<username>:<password>@cluster0.jwaekxl.mongodb.net/?retryWrites=true&w=majority"
+export MONGO_DB="disinfo_project"
+```
+### 3️⃣ Create MongoDB indexes (one-time)
+
+```bash
+python3 scripts/create_indexes.py
+```
+
+Indexes include:
+
+* text search on `text`
+* `claim_id`
+* `cluster_id`
+* timestamps
+
+
+### 4️⃣ Run the application
+
+```bash
+python3 -m frontend.app
+```
+
+The app will start at:
+
+```
+http://127.0.0.1:5000
+```
+
+## 🌐 Demo Pages
+
+### 🔍 Search Interface
+
+* **URL:** `/`
+* Search narrative text and view:
+
+  * similarity statistics
+  * match rates
+  * credibility score (heuristic)
+
+### 🔄 Mutation Dashboard
+
+* **URL:** `/mutations`
+* Displays:
+
+  * top mutated narrative clusters
+  * mutation score ranking
+  * drift-over-time placeholder (API-driven)
+
+If no mutation data exists yet, the page shows a clean **empty state**.
+
+## 🔌 API Endpoints
+
+These endpoints return JSON and are intended for visualization and analysis.
+
+### Narrative search
+
+```
+GET /api/search?query=<text>&limit=20
+```
+
+### Top claims
+
+```
+GET /api/top_claims?k=10
+```
+
+### Matches for a claim
+
+```
+GET /api/claim/<claim_id>?limit=50
+```
+
+### Top mutations
+
+```
+GET /api/mutations/top?k=10
+```
+
+### Mutation timeline
+
+```
+GET /api/mutations/timeline?cluster_id=<id>
+```
+
+If no mutation data exists, **mock fallback data** is returned so demos never break.
+
+
+## 🧪 Smoke Test (Optional)
+
+To verify MongoDB connectivity:
+
+```bash
+python3 -m scripts.smoke_test_db
+```
+
+## 📄 Data Contract
+
+The authoritative schema definition lives in:
+
+```
+docs/data_contract.md
+```
+
+All upstream and downstream components are expected to conform to this contract.
+
+## 🚧 Current Status
+
+* ✅ Backend DB layer complete
+* ✅ Flask API complete
+* ✅ Search + mutation UI ready
+* ⏳ Waiting on Spark streaming outputs for real mutation data
+
+---
+
+## 👩‍💻 Authors / Roles
+
+* **Backend + Storage Lead:** Palak Gupta
+* **Streaming / NLP / Visualization:** (team-specific)
