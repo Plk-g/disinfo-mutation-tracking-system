@@ -84,10 +84,11 @@ Data Sources (PolitiFact, Reddit, FineWeb, GDELT, etc.)
    export MONGO_DB="disinfo_project"
    ```
    
-   **Or use .env file:**
+   **Or use a `.env` file:**
    ```bash
    cp .env.example .env
-   # Edit .env with your credentials
+   # Edit .env with your credentials, then load it:
+   set -a && source .env && set +a
    ```
 
 4. **Create MongoDB indexes:**
@@ -160,12 +161,13 @@ disinfo-mutation-tracking-system/
 │
 ├── docs/
 │   ├── data_contract.md      # Data schema
-│   ├── storage_design.md     # Database design
-│   ├── ARCHITECTURE.md       # System architecture
-│   └── SCALABILITY.md        # Scalability strategies
+│   └── storage_design.md     # Database design
 │
 ├── main.py                   # Spark streaming consumer
-├── requirements.txt          # Python dependencies
+├── requirements.txt          # Pinned Python dependencies
+├── .env.example              # Env var template (copy to .env)
+├── ARCHITECTURE.md           # System architecture
+├── SETUP.md                  # Detailed setup
 └── README.md                 # This file
 ```
 
@@ -248,11 +250,13 @@ For detailed architecture documentation, see:
 
 ## 📝 Documentation
 
-- `LOCAL_TESTING.md` - Local testing guide
+- `README.md` - Project overview and quick start (this file)
 - `SETUP.md` - Detailed setup instructions
-- `TESTING.md` - Comprehensive testing guide
-- `BUG_FIXES.md` - Bug fixes and improvements
-- `PROJECT_REQUIREMENTS_ASSESSMENT.md` - Requirements analysis
+- `QUICK_START.md` - Short command cheat sheet
+- `TESTING.md` - Testing guide
+- `ARCHITECTURE.md` - System architecture and data flow
+- `SCALABILITY.md` - Scaling notes
+- `docs/data_contract.md` - Kafka / Mongo schemas
 
 ## 🤝 Contributing
 

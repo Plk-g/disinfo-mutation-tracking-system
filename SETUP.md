@@ -56,7 +56,15 @@ pip install -r requirements.txt
 
 ### Step 2: Configure Environment Variables
 
-Create a `.env` file or export these variables:
+Copy the template and fill in your MongoDB credentials:
+
+```bash
+cp .env.example .env
+# Edit .env, then load into your shell:
+set -a && source .env && set +a
+```
+
+Or export the variables directly:
 
 ```bash
 export MONGO_URI="mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority"
